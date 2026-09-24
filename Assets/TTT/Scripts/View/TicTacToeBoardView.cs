@@ -7,37 +7,28 @@ namespace TTT.Scripts.View
 {
     public class TicTacToeBoardView : MonoBehaviour
     {
-        private const int BoardSize = 3;
+        [Header("UI")]
+        [SerializeField] private RectTransform _winningLine;
+        [SerializeField] private UICell[] _cells;
 
-        [SerializeField]
-        private UICell[] _cells;
-
-        [Header("Winning Line")]
-        [SerializeField]
-        private RectTransform _winningLine;
+        private const int BOARD_SIZE = 3;
 
         public void Initialize(Action<int, int> onCellClicked)
         {
-            if (_cells.Length != BoardSize * BoardSize)
+            if (_cells.Length != BOARD_SIZE * BOARD_SIZE)
             {
-                Debug.LogError(
-                    $"TicTacToe Board requires {BoardSize * BoardSize} cells."
-                );
+                Debug.LogError($"TicTacToe Board requires {BOARD_SIZE * BOARD_SIZE} cells.");
 
                 return;
             }
 
-            for (int row = 0; row < BoardSize; row++)
+            for (int row = 0; row < BOARD_SIZE; row++)
             {
-                for (int column = 0; column < BoardSize; column++)
+                for (int column = 0; column < BOARD_SIZE; column++)
                 {
                     int index = GetIndex(row, column);
 
-                    _cells[index].Initialize(
-                        row,
-                        column,
-                        onCellClicked
-                    );
+                    _cells[index].Initialize(row, column, onCellClicked);
                 }
             }
 
@@ -73,32 +64,16 @@ namespace TTT.Scripts.View
 
         public void ShowWinningLine(WinningLine winningLine)
         {
-            int startIndex =
-                GetIndex(
-                    winningLine.StartRow,
-                    winningLine.StartColumn
-                );
+            var startIndex = GetIndex(winningLine.StartRow, winningLine.StartColumn);
+            var endIndex = GetIndex(winningLine.EndRow, winningLine.EndColumn);
 
-            int endIndex =
-                GetIndex(
-                    winningLine.EndRow,
-                    winningLine.EndColumn
-                );
+            var startCell = _cells[startIndex].GetComponent<RectTransform>();
+            var endCell = _cells[endIndex].GetComponent<RectTransform>();
 
-            var startCell =
-                _cells[startIndex].GetComponent<RectTransform>();
+            var startWorldPosition = startCell.TransformPoint(startCell.rect.center);
+            var endWorldPosition = endCell.TransformPoint(endCell.rect.center);
 
-            var endCell =
-                _cells[endIndex].GetComponent<RectTransform>();
-
-            var startWorldPosition =
-                startCell.TransformPoint(startCell.rect.center);
-
-            var endWorldPosition =
-                endCell.TransformPoint(endCell.rect.center);
-
-            var boardRect =
-                transform as RectTransform;
+            var boardRect = transform as RectTransform;
 
             RectTransformUtility.ScreenPointToLocalPointInRectangle(boardRect,
                 RectTransformUtility.WorldToScreenPoint(null, startWorldPosition),
@@ -112,38 +87,15 @@ namespace TTT.Scripts.View
                 out var endLocalPosition
             );
 
-            var direction =
-                endLocalPosition - startLocalPosition;
-
-            var distance =
-                direction.magnitude;
-
-            var center =
-                (startLocalPosition + endLocalPosition) / 2f;
-
-            var angle =
-                Mathf.Atan2(
-                    direction.y,
-                    direction.x
-                ) * Mathf.Rad2Deg;
+            var direction = endLocalPosition - startLocalPosition;
+            var distance = direction.magnitude;
+            var center = (startLocalPosition + endLocalPosition) / 2f;
+            var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
             _winningLine.gameObject.SetActive(true);
-
-            _winningLine.anchoredPosition =
-                center;
-
-            _winningLine.sizeDelta =
-                new Vector2(
-                    distance,
-                    _winningLine.sizeDelta.y
-                );
-
-            _winningLine.localRotation =
-                Quaternion.Euler(
-                    0f,
-                    0f,
-                    angle
-                );
+            _winningLine.anchoredPosition = center;
+            _winningLine.sizeDelta = new Vector2(distance, _winningLine.sizeDelta.y);
+            _winningLine.localRotation = Quaternion.Euler(0f, 0f, angle);
         }
 
         public void HideWinningLine()
@@ -153,7 +105,7 @@ namespace TTT.Scripts.View
 
         private int GetIndex(int row, int column)
         {
-            return row * BoardSize + column;
+            return row * BOARD_SIZE + column;
         }
     }
 }

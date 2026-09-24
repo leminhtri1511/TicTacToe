@@ -2,13 +2,13 @@
 {
     public struct WinningLine
     {
-        public bool HasWinner;
+        public readonly bool HasWinner;
 
-        public int StartRow;
-        public int StartColumn;
+        public readonly int StartRow;
+        public readonly int StartColumn;
 
-        public int EndRow;
-        public int EndColumn;
+        public readonly int EndRow;
+        public readonly int EndColumn;
 
         public WinningLine(int startRow, int startColumn, int endRow, int endColumn)
         {

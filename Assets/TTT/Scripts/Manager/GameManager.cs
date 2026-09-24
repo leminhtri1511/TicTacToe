@@ -61,26 +61,19 @@ namespace TTT.Scripts.Manager
 
         private void OnCellClicked(int row, int column)
         {
-            bool moveSuccess =
-                _game.MakeMove(row, column);
+            var moveSuccess = _game.MakeMove(row, column);
 
             if (!moveSuccess) return;
 
             UpdateCell(row, column);
-
             UpdateGameView();
         }
 
         private void UpdateCell(int row, int column)
         {
-            CellState state =
-                _game.GetCell(row, column);
+            var state = _game.GetCell(row, column);
 
-            _boardView.UpdateCell(
-                row,
-                column,
-                state
-            );
+            _boardView.UpdateCell(row, column, state);
         }
 
         private void UpdateGameView()
@@ -90,15 +83,12 @@ namespace TTT.Scripts.Manager
                 case GameState.Playing:
                     UpdateStatusText();
                     break;
-
                 case GameState.XWin:
                     ShowWinner("X");
                     break;
-
                 case GameState.OWin:
                     ShowWinner("O");
                     break;
-
                 case GameState.Draw:
                     ShowDraw();
                     break;
@@ -107,14 +97,12 @@ namespace TTT.Scripts.Manager
 
         private void UpdateStatusText()
         {
-            _statusText.text =
-                $"Turn: {_game.CurrentPlayer}";
+            _statusText.text = $"Turn: {_game.CurrentPlayer}";
         }
 
         private void ShowWinner(string player)
         {
-            _statusText.text =
-                $"{player} Win!";
+            _statusText.text = $"{player} Win!";
 
             _boardView.SetBoardInteractable(false);
             _boardView.ShowWinningLine(_game.WinningLine);
