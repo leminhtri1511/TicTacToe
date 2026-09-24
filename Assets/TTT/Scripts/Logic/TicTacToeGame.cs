@@ -4,16 +4,12 @@ namespace TTT.Scripts.Logic
 {
     public class TicTacToeGame
     {
-        private const int BoardSize = 3;
-
-        private readonly CellState[,] _board =
-            new CellState[BoardSize, BoardSize];
-
         public CellState CurrentPlayer { get; private set; }
-
         public GameState State { get; private set; }
-
         public WinningLine WinningLine { get; private set; }
+
+        private const int BOARD_SIZE = 3;
+        private readonly CellState[,] _board = new CellState[BOARD_SIZE, BOARD_SIZE];
 
         public void StartGame()
         {
@@ -60,11 +56,7 @@ namespace TTT.Scripts.Logic
             if (winningLine.HasWinner)
             {
                 WinningLine = winningLine;
-
-                State = CurrentPlayer == CellState.X
-                    ? GameState.XWin
-                    : GameState.OWin;
-
+                State = CurrentPlayer == CellState.X ? GameState.XWin : GameState.OWin;
                 return;
             }
 
@@ -76,35 +68,24 @@ namespace TTT.Scripts.Logic
 
         private WinningLine FindWinningLine(CellState player)
         {
-            // Rows
-            for (int row = 0; row < BoardSize; row++)
+            for (int row = 0; row < BOARD_SIZE; row++)
             {
                 if (_board[row, 0] == player &&
                     _board[row, 1] == player &&
                     _board[row, 2] == player)
                 {
-                    return new WinningLine(
-                        row,
-                        0,
-                        row,
-                        2
-                    );
+                    return new WinningLine(row, 0, row, 2);
                 }
             }
 
             // Columns
-            for (int column = 0; column < BoardSize; column++)
+            for (int column = 0; column < BOARD_SIZE; column++)
             {
                 if (_board[0, column] == player &&
                     _board[1, column] == player &&
                     _board[2, column] == player)
                 {
-                    return new WinningLine(
-                        0,
-                        column,
-                        2,
-                        column
-                    );
+                    return new WinningLine(0, column, 2, column);
                 }
             }
 
@@ -113,12 +94,7 @@ namespace TTT.Scripts.Logic
                 _board[1, 1] == player &&
                 _board[2, 2] == player)
             {
-                return new WinningLine(
-                    0,
-                    0,
-                    2,
-                    2
-                );
+                return new WinningLine(0, 0, 2, 2);
             }
 
             // Diagonal /
@@ -126,12 +102,7 @@ namespace TTT.Scripts.Logic
                 _board[1, 1] == player &&
                 _board[2, 0] == player)
             {
-                return new WinningLine(
-                    0,
-                    2,
-                    2,
-                    0
-                );
+                return new WinningLine(0, 2, 2, 0);
             }
 
             return default;
@@ -139,17 +110,14 @@ namespace TTT.Scripts.Logic
 
         private void SwitchPlayer()
         {
-            CurrentPlayer =
-                CurrentPlayer == CellState.X
-                    ? CellState.O
-                    : CellState.X;
+            CurrentPlayer = CurrentPlayer == CellState.X ? CellState.O : CellState.X;
         }
 
         private bool IsBoardFull()
         {
-            for (int row = 0; row < BoardSize; row++)
+            for (int row = 0; row < BOARD_SIZE; row++)
             {
-                for (int column = 0; column < BoardSize; column++)
+                for (int column = 0; column < BOARD_SIZE; column++)
                 {
                     if (_board[row, column] == CellState.Empty) return false;
                 }
@@ -160,9 +128,9 @@ namespace TTT.Scripts.Logic
 
         private void ClearBoard()
         {
-            for (int row = 0; row < BoardSize; row++)
+            for (int row = 0; row < BOARD_SIZE; row++)
             {
-                for (int column = 0; column < BoardSize; column++)
+                for (int column = 0; column < BOARD_SIZE; column++)
                 {
                     _board[row, column] = CellState.Empty;
                 }
@@ -171,10 +139,7 @@ namespace TTT.Scripts.Logic
 
         private bool IsValidPosition(int row, int column)
         {
-            return row >= 0 &&
-                   row < BoardSize &&
-                   column >= 0 &&
-                   column < BoardSize;
+            return row is >= 0 and < BOARD_SIZE && column is >= 0 and < BOARD_SIZE;
         }
     }
 }
