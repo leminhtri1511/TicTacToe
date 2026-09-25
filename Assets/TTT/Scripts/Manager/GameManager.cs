@@ -1,33 +1,18 @@
-using TMPro;
 using TTT.Scripts.Logic;
+using TTT.Scripts.Utils;
 using TTT.Scripts.View;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace TTT.Scripts.Manager
 {
-    public enum CellState
-    {
-        Empty,
-        X,
-        O
-    }
-
-    public enum GameState
-    {
-        Playing,
-        XWin,
-        OWin,
-        Draw
-    }
-
     public class GameManager : MonoBehaviour
     {
-        [Header("Board")]
-        [SerializeField] private TicTacToeBoardView _boardView;
+        [Header("Controllers")]
+        [SerializeField] private BoardViewHandle _boardViewHandle;
+        [SerializeField] private GameViewHandle _gameViewHandle;
 
         [Header("UI")]
-        [SerializeField] private TextMeshProUGUI _statusText;
         [SerializeField] private Button _restartButton;
 
         private TicTacToeGame _game;
@@ -41,22 +26,24 @@ namespace TTT.Scripts.Manager
         {
             _game = new TicTacToeGame();
 
-            _boardView.Initialize(OnCellClicked);
+            _boardViewHandle.Initialize(OnCellClicked);
 
             _restartButton.onClick.RemoveAllListeners();
             _restartButton.onClick.AddListener(RestartGame);
+
 
             StartGame();
         }
 
         private void StartGame()
         {
+            _restartButton.gameObject.SetActive(false);
             _game.StartGame();
 
-            _boardView.ResetBoard();
-            _boardView.SetBoardInteractable(true);
+            _boardViewHandle.ResetBoard();
+            _boardViewHandle.SetBoardInteractable(true);
 
-            UpdateStatusText();
+            UpdateGameStatus();
         }
 
         private void OnCellClicked(int row, int column)
@@ -66,53 +53,35 @@ namespace TTT.Scripts.Manager
             if (!moveSuccess) return;
 
             UpdateCell(row, column);
-            UpdateGameView();
+            UpdateGameStatus();
         }
 
         private void UpdateCell(int row, int column)
         {
             var state = _game.GetCell(row, column);
 
-            _boardView.UpdateCell(row, column, state);
+            _boardViewHandle.UpdateCell(row, column, state);
         }
 
-        private void UpdateGameView()
+        private void UpdateGameStatus()
         {
-            switch (_game.State)
+            _gameViewHandle.UpdateGameView(_game);
+
+            GameFinishedChecking();
+        }
+
+        private void GameFinishedChecking()
+        {
+            if (_game.GameState == GameState.Playing) return;
+
+            _boardViewHandle.SetBoardInteractable(false);
+
+            _restartButton.gameObject.SetActive(true);
+
+            if (_game.HasWinningCells)
             {
-                case GameState.Playing:
-                    UpdateStatusText();
-                    break;
-                case GameState.XWin:
-                    ShowWinner("X");
-                    break;
-                case GameState.OWin:
-                    ShowWinner("O");
-                    break;
-                case GameState.Draw:
-                    ShowDraw();
-                    break;
+                _boardViewHandle.ShowWinningCells(_game.WinningCells);
             }
-        }
-
-        private void UpdateStatusText()
-        {
-            _statusText.text = $"Turn: {_game.CurrentPlayer}";
-        }
-
-        private void ShowWinner(string player)
-        {
-            _statusText.text = $"{player} Win!";
-
-            _boardView.SetBoardInteractable(false);
-            _boardView.ShowWinningLine(_game.WinningLine);
-        }
-
-        private void ShowDraw()
-        {
-            _statusText.text = "Draw!";
-
-            _boardView.SetBoardInteractable(false);
         }
 
         private void RestartGame()

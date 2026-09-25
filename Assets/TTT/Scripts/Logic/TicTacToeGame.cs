@@ -1,40 +1,43 @@
-using TTT.Scripts.Manager;
+using System.Collections.Generic;
+using TTT.Scripts.Utils;
 
 namespace TTT.Scripts.Logic
 {
     public class TicTacToeGame
     {
-        public CellState CurrentPlayer { get; private set; }
-        public GameState State { get; private set; }
-        public WinningLine WinningLine { get; private set; }
+        public CellIdentity CurrentPlayer { get; private set; }
+        public GameState GameState { get; private set; }
 
         private const int BOARD_SIZE = 3;
-        private readonly CellState[,] _board = new CellState[BOARD_SIZE, BOARD_SIZE];
+        private readonly CellIdentity[,] _board = new CellIdentity[BOARD_SIZE, BOARD_SIZE];
+
+        private readonly CellPosition[] _winningCells = new CellPosition[3];
+
+        public IReadOnlyList<CellPosition> WinningCells => _winningCells;
+
+        public bool HasWinningCells => GameState is GameState.XWin or GameState.OWin;
 
         public void StartGame()
         {
             ClearBoard();
 
-            CurrentPlayer = CellState.X;
-
-            State = GameState.Playing;
-
-            WinningLine = default;
+            CurrentPlayer = CellIdentity.X;
+            GameState = GameState.Playing;
         }
 
         public bool MakeMove(int row, int column)
         {
-            if (State != GameState.Playing) return false;
+            if (GameState != GameState.Playing) return false;
 
             if (!IsValidPosition(row, column)) return false;
 
-            if (_board[row, column] != CellState.Empty) return false;
+            if (_board[row, column] != CellIdentity.Empty) return false;
 
             _board[row, column] = CurrentPlayer;
 
             UpdateGameState();
 
-            if (State == GameState.Playing)
+            if (GameState == GameState.Playing)
             {
                 SwitchPlayer();
             }
@@ -42,39 +45,38 @@ namespace TTT.Scripts.Logic
             return true;
         }
 
-        public CellState GetCell(int row, int column)
+        public CellIdentity GetCell(int row, int column)
         {
-            if (!IsValidPosition(row, column)) return CellState.Empty;
+            if (!IsValidPosition(row, column)) return CellIdentity.Empty;
 
             return _board[row, column];
         }
 
         private void UpdateGameState()
         {
-            WinningLine winningLine = FindWinningLine(CurrentPlayer);
-
-            if (winningLine.HasWinner)
+            if (TryFindWinner(CurrentPlayer))
             {
-                WinningLine = winningLine;
-                State = CurrentPlayer == CellState.X ? GameState.XWin : GameState.OWin;
+                GameState = CurrentPlayer == CellIdentity.X ? GameState.XWin : GameState.OWin;
                 return;
             }
 
             if (IsBoardFull())
             {
-                State = GameState.Draw;
+                GameState = GameState.Draw;
             }
         }
 
-        private WinningLine FindWinningLine(CellState player)
+        private bool TryFindWinner(CellIdentity player)
         {
+            // Rows
             for (int row = 0; row < BOARD_SIZE; row++)
             {
                 if (_board[row, 0] == player &&
                     _board[row, 1] == player &&
                     _board[row, 2] == player)
                 {
-                    return new WinningLine(row, 0, row, 2);
+                    SetWinningCells(row, 0, row, 1, row, 2);
+                    return true;
                 }
             }
 
@@ -85,7 +87,8 @@ namespace TTT.Scripts.Logic
                     _board[1, column] == player &&
                     _board[2, column] == player)
                 {
-                    return new WinningLine(0, column, 2, column);
+                    SetWinningCells(0, column, 1, column, 2, column);
+                    return true;
                 }
             }
 
@@ -94,7 +97,9 @@ namespace TTT.Scripts.Logic
                 _board[1, 1] == player &&
                 _board[2, 2] == player)
             {
-                return new WinningLine(0, 0, 2, 2);
+                SetWinningCells(0, 0, 1, 1, 2, 2);
+
+                return true;
             }
 
             // Diagonal /
@@ -102,15 +107,23 @@ namespace TTT.Scripts.Logic
                 _board[1, 1] == player &&
                 _board[2, 0] == player)
             {
-                return new WinningLine(0, 2, 2, 0);
+                SetWinningCells(0, 2, 1, 1, 2, 0);
+                return true;
             }
 
-            return default;
+            return false;
+        }
+
+        private void SetWinningCells(int row1, int column1, int row2, int column2, int row3, int column3)
+        {
+            _winningCells[0] = new CellPosition(row1, column1);
+            _winningCells[1] = new CellPosition(row2, column2);
+            _winningCells[2] = new CellPosition(row3, column3);
         }
 
         private void SwitchPlayer()
         {
-            CurrentPlayer = CurrentPlayer == CellState.X ? CellState.O : CellState.X;
+            CurrentPlayer = CurrentPlayer == CellIdentity.X ? CellIdentity.O : CellIdentity.X;
         }
 
         private bool IsBoardFull()
@@ -119,7 +132,7 @@ namespace TTT.Scripts.Logic
             {
                 for (int column = 0; column < BOARD_SIZE; column++)
                 {
-                    if (_board[row, column] == CellState.Empty) return false;
+                    if (_board[row, column] == CellIdentity.Empty) return false;
                 }
             }
 
@@ -132,8 +145,18 @@ namespace TTT.Scripts.Logic
             {
                 for (int column = 0; column < BOARD_SIZE; column++)
                 {
-                    _board[row, column] = CellState.Empty;
+                    _board[row, column] = CellIdentity.Empty;
                 }
+            }
+
+            ClearWinningCells();
+        }
+
+        private void ClearWinningCells()
+        {
+            for (int i = 0; i < _winningCells.Length; i++)
+            {
+                _winningCells[i] = default;
             }
         }
 
