@@ -17,6 +17,16 @@ namespace TTT.Scripts.Manager
 
         private TicTacToeGame _game;
 
+        private void OnEnable()
+        {
+            _restartButton.onClick.AddListener(RestartGame);
+        }
+
+        private void OnDisable()
+        {
+            _restartButton.onClick.RemoveAllListeners();
+        }
+
         private void Start()
         {
             InitializeGame();
@@ -26,22 +36,16 @@ namespace TTT.Scripts.Manager
         {
             _game = new TicTacToeGame();
 
-            _boardViewHandle.Initialize(OnCellClicked);
-
-            _restartButton.onClick.RemoveAllListeners();
-            _restartButton.onClick.AddListener(RestartGame);
-
+            _boardViewHandle.InitializeBoard(OnCellClicked);
 
             StartGame();
         }
 
         private void StartGame()
         {
-            _restartButton.gameObject.SetActive(false);
             _game.StartGame();
-
+            ToggleRestartButton(false);
             _boardViewHandle.ResetBoard();
-            _boardViewHandle.SetBoardInteractable(true);
 
             UpdateGameStatus();
         }
@@ -76,7 +80,7 @@ namespace TTT.Scripts.Manager
 
             _boardViewHandle.SetBoardInteractable(false);
 
-            _restartButton.gameObject.SetActive(true);
+            ToggleRestartButton(true);
 
             if (_game.HasWinningCells)
             {
@@ -87,6 +91,11 @@ namespace TTT.Scripts.Manager
         private void RestartGame()
         {
             StartGame();
+        }
+
+        private void ToggleRestartButton(bool isVisible)
+        {
+            _restartButton.gameObject.SetActive(isVisible);
         }
     }
 }

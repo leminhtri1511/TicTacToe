@@ -8,9 +8,8 @@ namespace TTT.Scripts.Logic
         public CellIdentity CurrentPlayer { get; private set; }
         public GameState GameState { get; private set; }
 
-        private const int BOARD_SIZE = 3;
-        private readonly CellIdentity[,] _board = new CellIdentity[BOARD_SIZE, BOARD_SIZE];
-
+        private static int BoardSize => TTTUtils.BOARD_SIZE;
+        private readonly CellIdentity[,] _board = new CellIdentity[BoardSize, BoardSize];
         private readonly CellPosition[] _winningCells = new CellPosition[3];
 
         public IReadOnlyList<CellPosition> WinningCells => _winningCells;
@@ -69,7 +68,7 @@ namespace TTT.Scripts.Logic
         private bool TryFindWinner(CellIdentity player)
         {
             // Rows
-            for (int row = 0; row < BOARD_SIZE; row++)
+            for (int row = 0; row < BoardSize; row++)
             {
                 if (_board[row, 0] == player &&
                     _board[row, 1] == player &&
@@ -81,7 +80,7 @@ namespace TTT.Scripts.Logic
             }
 
             // Columns
-            for (int column = 0; column < BOARD_SIZE; column++)
+            for (int column = 0; column < BoardSize; column++)
             {
                 if (_board[0, column] == player &&
                     _board[1, column] == player &&
@@ -128,9 +127,9 @@ namespace TTT.Scripts.Logic
 
         private bool IsBoardFull()
         {
-            for (int row = 0; row < BOARD_SIZE; row++)
+            for (int row = 0; row < BoardSize; row++)
             {
-                for (int column = 0; column < BOARD_SIZE; column++)
+                for (int column = 0; column < BoardSize; column++)
                 {
                     if (_board[row, column] == CellIdentity.Empty) return false;
                 }
@@ -141,9 +140,9 @@ namespace TTT.Scripts.Logic
 
         private void ClearBoard()
         {
-            for (int row = 0; row < BOARD_SIZE; row++)
+            for (int row = 0; row < BoardSize; row++)
             {
-                for (int column = 0; column < BOARD_SIZE; column++)
+                for (int column = 0; column < BoardSize; column++)
                 {
                     _board[row, column] = CellIdentity.Empty;
                 }
@@ -162,7 +161,7 @@ namespace TTT.Scripts.Logic
 
         private bool IsValidPosition(int row, int column)
         {
-            return row is >= 0 and < BOARD_SIZE && column is >= 0 and < BOARD_SIZE;
+            return row is >= 0 and < TTTUtils.BOARD_SIZE && column is >= 0 and < TTTUtils.BOARD_SIZE;
         }
     }
 }
