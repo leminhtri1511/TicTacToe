@@ -1,3 +1,4 @@
+using TTT.Scripts.Data;
 using TTT.Scripts.Logic;
 using TTT.Scripts.Utils;
 using TTT.Scripts.View;
@@ -14,17 +15,20 @@ namespace TTT.Scripts.Manager
 
         [Header("UI")]
         [SerializeField] private Button _restartButton;
+        [SerializeField] private Button _clearGameDataButton;
 
         private TicTacToeGame _game;
 
         private void OnEnable()
         {
             _restartButton.onClick.AddListener(RestartGame);
+            _clearGameDataButton.onClick.AddListener(ClearGameData);
         }
 
         private void OnDisable()
         {
             _restartButton.onClick.RemoveAllListeners();
+            _clearGameDataButton.onClick.RemoveAllListeners();
         }
 
         private void Start()
@@ -46,7 +50,6 @@ namespace TTT.Scripts.Manager
             _game.StartGame();
             ToggleRestartButton(false);
             _boardViewHandle.ResetBoard();
-
             UpdateGameStatus();
         }
 
@@ -78,6 +81,8 @@ namespace TTT.Scripts.Manager
         {
             if (_game.GameState == GameState.Playing) return;
 
+            SaveMatchResult();
+
             _boardViewHandle.SetBoardInteractable(false);
 
             ToggleRestartButton(true);
@@ -86,11 +91,44 @@ namespace TTT.Scripts.Manager
             {
                 _boardViewHandle.ShowWinningCells(_game.WinningCells);
             }
+
+            _gameViewHandle.SetGameData();
+        }
+
+        private void SaveMatchResult()
+        {
+            var data = GameDataService.Instance.Data;
+
+            switch (_game.GameState)
+            {
+                case GameState.XWin:
+                    data.XWinCount++;
+                    break;
+
+                case GameState.OWin:
+                    data.OWinCount++;
+                    break;
+
+                case GameState.Draw:
+                    data.DrawCount++;
+                    break;
+
+                default:
+                    return;
+            }
+
+            GameDataService.Instance.Save();
         }
 
         private void RestartGame()
         {
             StartGame();
+        }
+
+        private void ClearGameData()
+        {
+            GameDataService.Instance.ResetData();
+            _gameViewHandle.SetGameData();
         }
 
         private void ToggleRestartButton(bool isVisible)
