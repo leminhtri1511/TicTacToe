@@ -10,19 +10,19 @@ namespace TTT.Scripts.View
         [Header("Cells")]
         [SerializeField] private UICell[] _cells;
 
-        private const int BOARD_SIZE = 3;
+        private static int BoardSize => TTTUtils.BOARD_SIZE;
 
-        public void Initialize(Action<int, int> onCellClicked)
+        public void InitializeBoard(Action<int, int> onCellClicked)
         {
-            if (_cells.Length != BOARD_SIZE * BOARD_SIZE)
+            if (_cells.Length != BoardSize * BoardSize)
             {
-                Debug.LogError($"TicTacToe Board requires {BOARD_SIZE * BOARD_SIZE} cells.");
+                Debug.LogError($"TicTacToe Board requires {BoardSize * BoardSize} cells.");
                 return;
             }
 
-            for (int row = 0; row < BOARD_SIZE; row++)
+            for (int row = 0; row < BoardSize; row++)
             {
-                for (int column = 0; column < BOARD_SIZE; column++)
+                for (int column = 0; column < BoardSize; column++)
                 {
                     var index = GetIndex(row, column);
 
@@ -54,11 +54,6 @@ namespace TTT.Scripts.View
             }
         }
 
-        private int GetIndex(int row, int column)
-        {
-            return row * BOARD_SIZE + column;
-        }
-
         public void ShowWinningCells(IReadOnlyList<CellPosition> winningCells)
         {
             foreach (var cell in _cells)
@@ -72,6 +67,11 @@ namespace TTT.Scripts.View
 
                 _cells[index].ToggleOverlayRT(false);
             }
+        }
+
+        private int GetIndex(int row, int column)
+        {
+            return row * BoardSize + column;
         }
     }
 }
